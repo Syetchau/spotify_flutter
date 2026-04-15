@@ -80,6 +80,8 @@ This project requires Firebase. You need to set up your own Firebase project and
 
 - iOS: Place GoogleService-Info.plist in ios/Runner/
 
+- Flutter: Place firebase_options.dart in lib/firebase_options.dart if the file not auto generated
+
 Alternatively, use the FlutterFire CLI:
 
 ```bash
