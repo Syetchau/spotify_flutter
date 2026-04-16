@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:spotify/common/helpers/navigation_utils.dart';
 import 'package:spotify/common/helpers/theme_utils.dart';
+import 'package:spotify/common/helpers/validator_utils.dart';
 import 'package:spotify/common/widgets/app_button.dart';
+import 'package:spotify/common/widgets/app_email_field.dart';
 import 'package:spotify/common/widgets/app_loading.dart';
+import 'package:spotify/common/widgets/app_password_field.dart';
 import 'package:spotify/common/widgets/app_text.dart';
 import 'package:spotify/common/widgets/app_top_bar.dart';
 import 'package:spotify/data/models/auth/create_user_request.dart';
@@ -21,6 +24,7 @@ class SignUpPage extends StatelessWidget {
   final TextEditingController _fullName = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();    // Validation
 
   SignUpPage({ super.key });
 
@@ -49,30 +53,35 @@ class SignUpPage extends StatelessWidget {
                 SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsetsGeometry.symmetric(vertical: 50, horizontal: 30),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        _registerText(context.adaptiveTextColor),   // Register text
-                        const SizedBox(height: 50),                 // Spacer
-                        _fullNameField(context),                    // Name text field
-                        const SizedBox(height: 20),                 // Spacer
-                        _emailField(context),                       // Email text field
-                        const SizedBox(height: 20),                 // Spacer
-                        _passwordField(context),                    // Password text field
-                        const SizedBox(height: 20),                 // Spacer
-                        _registerBtn(() async {                     // Register btn
-                          if (state is! SignUpLoading ) {
-                            FocusScope.of(context).unfocus();       // hide keyboard
-                            context.read<SignUpCubit>().signUp(
-                                params: CreateUserRequest(
-                                  username: _fullName.text.trim(),
-                                  email: _email.text.trim(),
-                                  password: _password.text.trim(),
-                                )
-                            );
-                          }
-                        }.throttle())
-                      ],
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          _registerText(context.adaptiveTextColor),   // Register text
+                          const SizedBox(height: 50),                 // Spacer
+                          _fullNameField(context),                    // Name text field
+                          const SizedBox(height: 20),                 // Spacer
+                          AppEmailField(controller: _email),          // Email text field
+                          const SizedBox(height: 20),                 // Spacer
+                          AppPasswordField(controller: _password),    // Password text field
+                          const SizedBox(height: 20),                 // Spacer
+                          _registerBtn(() async {                     // Register btn
+                            if (state is! SignUpLoading ) {
+                              if (_formKey.currentState!.validate()) {
+                                FocusScope.of(context).unfocus();     // hide keyboard
+                                context.read<SignUpCubit>().signUp(
+                                    params: CreateUserRequest(
+                                      username: _fullName.text.trim(),
+                                      email: _email.text.trim(),
+                                      password: _password.text.trim(),
+                                    )
+                                );
+                              }
+                            }
+                          }.throttle())
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -98,32 +107,11 @@ class SignUpPage extends StatelessWidget {
   }
 
   Widget _fullNameField(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: _fullName,
+      validator: FormValidator.validateName,
       decoration: const InputDecoration(
-          hintText: 'Full Name',
-          isDense: true,
-          contentPadding: EdgeInsetsGeometry.symmetric(vertical: 20, horizontal: 16)
-      ).applyDefaults(Theme.of(context).inputDecorationTheme),
-    );
-  }
-
-  Widget _emailField(BuildContext context) {
-    return TextField(
-      controller: _email,
-      decoration: const InputDecoration(
-          hintText: 'Enter Email',
-          isDense: true,
-          contentPadding: EdgeInsetsGeometry.symmetric(vertical: 20, horizontal: 16)
-      ).applyDefaults(Theme.of(context).inputDecorationTheme),
-    );
-  }
-
-  Widget _passwordField(BuildContext context) {
-    return TextField(
-      controller: _password,
-      decoration: const InputDecoration(
-          hintText: 'Enter Password',
+          hintText: 'Enter Name',
           isDense: true,
           contentPadding: EdgeInsetsGeometry.symmetric(vertical: 20, horizontal: 16)
       ).applyDefaults(Theme.of(context).inputDecorationTheme),
