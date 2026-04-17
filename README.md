@@ -61,7 +61,15 @@ lib/
 └── service/             # Infrastructure services
     └── service_locator.dart # Dependency Injection setup (GetIt)
 ```
+
 ## ⚙️ Setup & Installation
+
+### 📋 Prerequisites
+- Flutter SDK: `>=3.0.0`
+- Dart SDK: `>=3.0.0`
+- Java: `17` (Recommended for Android builds)
+- CocoaPods: Latest version (For iOS)
+
 Follow these steps to get the development environment running locally:
 
 ### 1. Clone the Repository
@@ -204,7 +212,7 @@ flutter run
 flutter run --release
 ```
 
-### 🧠 Architecture Mapping (Android vs. Flutter)
+## 🧠 Architecture Mapping (Android vs. Flutter)
 
 | Category                 | Android (Native) | Flutter (This Project)        |
 |:-------------------------|:-----------------|:------------------------------|
@@ -213,3 +221,25 @@ flutter run --release
 | **Dependency Injection** | Dagger / Hilt    | GetIt                         |
 | **Networking**           | Retrofit         | Dio / Http                    |
 | **Persistence**          | Room             | Path Provider / Hydrated BLoC |
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📜 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+## ✉️ Contact
+
+**Liew Syet Chau** - [LinkedIn](https://www.linkedin.com/in/liew-syet-chau-8b2a45186/) - syetchau@gmail.com 
+
+Project Link: [https://github.com/Syetchau/spotify_flutter](https://github.com/Syetchau/spotify_flutter)
