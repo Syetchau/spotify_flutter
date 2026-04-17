@@ -17,6 +17,7 @@ import '../../../common/widgets/app_text.dart';
 import '../../../common/widgets/app_top_bar.dart';
 import '../../../core/configs/asset/app_vectors.dart';
 import '../../../core/configs/theme/app_colors.dart';
+import '../../root/bloc/root_auth_cubit.dart';
 import '../../root/pages/root.dart';
 import '../bloc/sign_in_state.dart';
 
@@ -43,7 +44,12 @@ class SignInPage extends StatelessWidget {
             }
             // Sign In Success
             if (state is SignInSuccess) {
-              context.pushAndRemoveUntil(const RootPage());
+              context.pushAndRemoveUntil(
+                  BlocProvider(
+                      create: (context) => RootAuthCubit(),
+                      child: const RootPage()
+                  )
+              );
             }
           },
           builder: (context, state) {
@@ -88,7 +94,7 @@ class SignInPage extends StatelessWidget {
                 ),
 
                 // Sign Up Loading
-                if (state is SignInLoading) AbsorbPointer(child: AppLoading())
+                if (state is SignInLoading) const AppLoading()
               ],
             );
           },

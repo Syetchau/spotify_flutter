@@ -6,12 +6,14 @@ class AppLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.black.withValues(alpha: 0.5),
-      child: const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+    return AbsorbPointer(
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.black.withValues(alpha: 0.5),
+        child: const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       ),
     );
   }

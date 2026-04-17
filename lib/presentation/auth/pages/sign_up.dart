@@ -19,6 +19,7 @@ import 'package:spotify/presentation/root/pages/root.dart';
 import '../../../common/helpers/throttle_utils.dart';
 import '../../../core/configs/asset/app_vectors.dart';
 import '../../../core/configs/theme/app_colors.dart';
+import '../../root/bloc/root_auth_cubit.dart';
 
 class SignUpPage extends StatelessWidget {
 
@@ -44,7 +45,12 @@ class SignUpPage extends StatelessWidget {
             }
             // Sign Up Success
             if (state is SignUpSuccess) {
-              context.pushAndRemoveUntil(const RootPage());
+              context.pushAndRemoveUntil(
+                  BlocProvider(
+                      create: (context) => RootAuthCubit(),
+                      child: const RootPage()
+                  )
+              );
             }
           },
           builder: (context, state) {
@@ -75,7 +81,7 @@ class SignUpPage extends StatelessWidget {
                 ),
 
                 // Sign Up Loading
-                if (state is SignUpLoading) AbsorbPointer(child: AppLoading())
+                if (state is SignUpLoading) const AppLoading()
               ],
             );
           },
