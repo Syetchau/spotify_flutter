@@ -88,8 +88,113 @@ Alternatively, use the FlutterFire CLI:
 ```bash
 flutterfire configure
 ```
+### 4. Google & Facebook Sign-In Configuration
 
-### 4. Run the Application
+To enable social authentication, native configuration is required for both platforms.
+
+#### 🟢 Google Sign-In
+
+- **Firebase Console**: Enable **Google** as a Sign-in provider.
+
+- **Android**:
+
+    - Generate your **Debug SHA-1**:
+      ```bash
+      keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+      ```
+      
+    - Add the SHA-1 to your **Firebase Project Settings**.
+  
+    - Download and place `google-services.json` in `android/app/`.
+  
+- **iOS**:
+    - Locate `REVERSED_CLIENT_ID` in `GoogleService-Info.plist`.
+  
+    - Add it to `ios/Runner/Info.plist`:
+  
+      ```xml
+      <key>CFBundleURLTypes</key>
+      <array>
+          <dict>
+              <key>CFBundleTypeRole</key>
+              <string>Editor</string>
+              <key>CFBundleURLSchemes</key>
+              <array>
+                  <string>YOUR_REVERSED_CLIENT_ID_HERE</string>
+              </array>
+          </dict>
+      </array>
+      ```
+
+#### 🔵 Facebook Sign-In
+
+- **Meta for Developers**: Create an app and obtain your **App ID** and **Client Token** at the [Meta Developers Portal](https://developers.facebook.com/).
+
+- **Firebase Console**: 
+
+    - Enable **Facebook** in the Auth providers list.
+  
+    - Enter your **App ID** and **App Secret** (found in your Meta App settings).
+  
+    - **Crucial**: Copy the **OAuth redirect URI** provided by Firebase (e.g., `https://your-project-id.firebaseapp.com/__/auth/handler`) and paste it into your [Meta Developers Portal](https://developers.facebook.com/) under **Facebook Login > Settings > Valid OAuth Redirect URIs**.
+
+- **Android**:
+
+    - Add these to `android/app/src/main/res/values/strings.xml`:
+  
+      ```xml
+      <string name="facebook_app_id">YOUR_APP_ID</string>
+      <string name="fb_login_protocol_scheme">fbYOUR_APP_ID</string>
+      <string name="facebook_client_token">YOUR_CLIENT_TOKEN</string>
+      ```
+      
+    - Add this inside the `<application>` tag in `AndroidManifest.xml`:
+  
+      ```xml
+      <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+      <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
+  
+      <activity android:name="com.facebook.FacebookActivity"
+          android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+          android:label="@string/app_name" />
+      <activity
+          android:name="com.facebook.CustomTabActivity"
+          android:exported="true">
+          <intent-filter>
+              <action android:name="android.intent.action.VIEW" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <category android:name="android.intent.category.BROWSABLE" />
+              <data android:scheme="@string/fb_login_protocol_scheme" />
+          </intent-filter>
+      </activity>
+      ```
+
+- **iOS**:
+    - Open `ios/Runner/Info.plist` and add the following entries (replace `YOUR_APP_ID`, `YOUR_CLIENT_TOKEN`, and `YOUR_APP_NAME` with your actual Meta Developer credentials):
+      ```xml
+      <key>CFBundleURLTypes</key>
+      <array>
+        <dict>
+          <key>CFBundleURLSchemes</key>
+          <array>
+            <string>fbYOUR_APP_ID</string>
+          </array>
+        </dict>
+      </array>
+      <key>FacebookAppID</key>
+      <string>YOUR_APP_ID</string>
+      <key>FacebookClientToken</key>
+      <string>YOUR_CLIENT_TOKEN</string>
+      <key>FacebookDisplayName</key>
+      <string>YOUR_APP_NAME</string>
+      <key>LSApplicationQueriesSchemes</key>
+      <array>
+        <string>fbapi</string>
+        <string>fb-messenger-share-api</string>
+      </array>
+      ```
+
+### 5. Run the Application
 
 ```bash
 # To run on a connected device or emulator
@@ -99,11 +204,12 @@ flutter run
 flutter run --release
 ```
 
-## 🧠 Learning Objectives (Android Dev Perspective)
-Mapping ViewModel logic to Cubit.
+### 🧠 Architecture Mapping (Android vs. Flutter)
 
-Understanding the Widget Lifecycle vs Android Fragments.
-
-Implementing Unidirectional Data Flow in a multi-platform environment.
-
-Using GetIt as a lightweight alternative to Dagger/Hilt.
+| Category                 | Android (Native) | Flutter (This Project)        |
+|:-------------------------|:-----------------|:------------------------------|
+| **Logic & State**        | ViewModel        | Cubit / BLoC                  |
+| **Reactive UI**          | LiveData / Flow  | Streams / States              |
+| **Dependency Injection** | Dagger / Hilt    | GetIt                         |
+| **Networking**           | Retrofit         | Dio / Http                    |
+| **Persistence**          | Room             | Path Provider / Hydrated BLoC |
