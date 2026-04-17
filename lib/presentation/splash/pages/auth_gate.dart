@@ -16,6 +16,7 @@ class AuthGate extends StatelessWidget {
       create: (context) => RootAuthCubit(),
       child: BlocConsumer<RootAuthCubit, RootAuthState>(
         listener: (context, state) {
+          // Unauthenticated failed
           if (state is Unauthenticated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -26,18 +27,21 @@ class AuthGate extends StatelessWidget {
           }
         },
         builder: (context, authState) {
-          return StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.idTokenChanges(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SplashPage();
-              } else if (snapshot.hasData && snapshot.data != null || authState is AuthLoading) {
-                return const RootPage();
-              } else {
-                return const GetStartedPage();
-              }
-            },
-          );
+          // If the Cubit hasn't finished the 2s timer, stay on Splash
+          if (authState is AuthInitial) {
+            return const SplashPage();
+          } else {
+            return StreamBuilder<User?>(
+              stream: FirebaseAuth.instance.idTokenChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null || authState is AuthLoading) {
+                  return const RootPage();
+                } else {
+                  return const GetStartedPage();
+                }
+              },
+            );
+          }
         },
       ),
     );

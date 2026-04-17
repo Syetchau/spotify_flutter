@@ -4,7 +4,9 @@ import 'package:spotify/presentation/root/bloc/root_auth_state.dart';
 
 class RootAuthCubit extends Cubit<RootAuthState> {
 
-  RootAuthCubit() : super(AuthInitial());
+  RootAuthCubit() : super(AuthInitial()) {
+    _startApp();
+  }
 
   Future<void> checkAuthStatus() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -19,5 +21,10 @@ class RootAuthCubit extends Cubit<RootAuthState> {
       await Future.delayed(const Duration(milliseconds: 200));
       await FirebaseAuth.instance.signOut();
     }
+  }
+
+  void _startApp() async {
+    await Future.delayed(const Duration(milliseconds: 2000));
+    emit(AuthAppReady());
   }
 }
