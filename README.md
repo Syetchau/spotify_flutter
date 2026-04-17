@@ -14,16 +14,17 @@ This project follows **Clean Architecture**, ensuring a strict separation of con
 
 ## 🛠️ Tech Stack & Dependencies
 
-| Category                   | Tools / Packages                         |
-|:---------------------------|:-----------------------------------------|
-| **Language**               | [Dart](https://dart.dev/)                |
-| **Framework**              | [Flutter](https://flutter.dev/)          |
-| **State Management**       | `flutter_bloc`, `hydrated_bloc`          |
-| **Service Locator**        | `get_it` (Dependency Injection)          |
-| **Functional Programming** | `dartz` (Either type for Error Handling) |
-| **Backend**                | `firebase_core`, `firebase_auth`         |
-| **Storage**                | `path_provider`                          |
-| **UI/UX**                  | `flutter_svg`, Custom Satoshi Fonts      |
+| Category                   | Tools / Packages                          |
+|:---------------------------|:------------------------------------------|
+| **Language**               | [Dart](https://dart.dev/)                 |
+| **Framework**              | [Flutter](https://flutter.dev/)           |
+| **State Management**       | `flutter_bloc`, `hydrated_bloc`           |
+| **Service Locator**        | `get_it` (Dependency Injection)           |
+| **Functional Programming** | `dartz` (Either type for Error Handling)  |
+| **Backend**                | `firebase_core`, `firebase_auth`          |
+| **Authentication**         | `google_sign_in`, `flutter_facebook_auth` |
+| **Storage**                | `path_provider`                           |
+| **UI/UX**                  | `flutter_svg`, Custom Satoshi Fonts       |
 
 ## 🚀 Key Features Applied
 
