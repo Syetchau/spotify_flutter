@@ -7,4 +7,8 @@ abstract class AuthRepository {
   Future<Either> signUp(CreateUserRequest request);
 
   Future<Either> signIn(SignInUserRequest request);
+
+  Future<Either> signInWithGoogle();
+
+  Future<Either> signInWithFacebook();
 }

@@ -50,4 +50,4 @@ android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 
 # Android string resource contain sensitive data
-android/app/src/main/res/values/string.xml
+android/app/src/main/res/values/strings.xml

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:spotify/common/helpers/app_utils.dart';
 import 'package:spotify/common/helpers/navigation_utils.dart';
 import 'package:spotify/common/helpers/theme_utils.dart';
 import 'package:spotify/common/helpers/validator_utils.dart';
@@ -66,20 +67,7 @@ class SignUpPage extends StatelessWidget {
                           const SizedBox(height: 20),                 // Spacer
                           AppPasswordField(controller: _password),    // Password text field
                           const SizedBox(height: 20),                 // Spacer
-                          _registerBtn(() async {                     // Register btn
-                            if (state is! SignUpLoading ) {
-                              if (_formKey.currentState!.validate()) {
-                                FocusScope.of(context).unfocus();     // hide keyboard
-                                context.read<SignUpCubit>().signUp(
-                                    params: CreateUserRequest(
-                                      username: _fullName.text.trim(),
-                                      email: _email.text.trim(),
-                                      password: _password.text.trim(),
-                                    )
-                                );
-                              }
-                            }
-                          }.throttle())
+                          _registerBtn(context, state)                // Sign Up button
                         ],
                       ),
                     ),
@@ -142,9 +130,22 @@ class SignUpPage extends StatelessWidget {
     );
   }
 
-  Widget _registerBtn(VoidCallback onPressed) {
+  Widget _registerBtn(BuildContext context, SignUpState state) {
     return AppButton(
-        onPressed: onPressed,
+        onPressed: () {
+          if (state is! SignUpLoading ) {
+            if (_formKey.currentState!.validate()) {
+              context.hideKeyboard();
+              context.read<SignUpCubit>().signUp(
+                  params: CreateUserRequest(
+                    username: _fullName.text.trim(),
+                    email: _email.text.trim(),
+                    password: _password.text.trim(),
+                  )
+              );
+            }
+          }
+        }.throttle(),
         title: 'Create Account',
         fontSize: 16
     );

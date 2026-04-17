@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:spotify/common/helpers/app_utils.dart';
 import 'package:spotify/common/helpers/navigation_utils.dart';
 import 'package:spotify/common/helpers/theme_utils.dart';
 import 'package:spotify/common/widgets/app_email_field.dart';
+import 'package:spotify/common/widgets/app_icon_button.dart';
 import 'package:spotify/common/widgets/app_password_field.dart';
 import 'package:spotify/data/models/auth/sign_in_user_request.dart';
 import 'package:spotify/presentation/auth/bloc/sign_in_cubit.dart';
@@ -61,19 +63,24 @@ class SignInPage extends StatelessWidget {
                           const SizedBox(height: 20),                 // Spacer
                           AppPasswordField(controller: _password),    // Password
                           const SizedBox(height: 20),                 // Spacer
-                          _signInBtn(() {                             // Sign In Button
-                            if (state is! SignInLoading ) {
-                              if (_formKey.currentState!.validate()) {
-                                FocusScope.of(context).unfocus();     // hide keyboard
-                                context.read<SignInCubit>().signIn(
-                                    params: SignInUserRequest(
-                                        email: _email.text.trim(),
-                                        password: _password.text.trim()
-                                    )
-                                );
-                              }
-                            }
-                          }.throttle())
+                          _signInBtn(context, state),                 // Sign In button
+                          const SizedBox(height: 50),                 // Spacer
+                          _signUpLabel(),                             // Sign up with label
+                          const SizedBox(height: 20),                 // Spacer
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AppIconButton(                            // Google button
+                                  imagePath: AppVectors.google,
+                                  onPressed: () { context.read<SignInCubit>().googleLogin(); }
+                              ),
+                              const SizedBox(width: 20),                 // Spacer
+                              AppIconButton(                             // Facebook button
+                                  imagePath: AppVectors.facebook,
+                                  onPressed: () { context.read<SignInCubit>().facebookLogin(); }
+                              )
+                            ],
+                          )
                         ],
                       ),
                     ),
@@ -108,7 +115,7 @@ class SignInPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AppText(
-              'Not A Member?',
+              'Don\'t have an account?',
               fontWeight: FontWeight.w500,
               color: context.adaptiveTextColor,
             ),
@@ -124,11 +131,32 @@ class SignInPage extends StatelessWidget {
     );
   }
 
-  Widget _signInBtn(VoidCallback onPressed) {
+  Widget _signInBtn(BuildContext context, SignInState state) {
     return AppButton(
-        onPressed: onPressed,
+        onPressed: () {
+          if (state is! SignInLoading ) {
+            if (_formKey.currentState!.validate()) {
+              context.hideKeyboard();
+              context.read<SignInCubit>().signIn(
+                  params: SignInUserRequest(
+                      email: _email.text.trim(),
+                      password: _password.text.trim()
+                  )
+              );
+            }
+          }
+        }.throttle(),
         title: 'Sign In',
         fontSize: 16
+    );
+  }
+
+  Widget _signUpLabel() {
+    return AppText(
+      'or sign up with',
+      color: AppColors.primary,
+      fontWeight: FontWeight.w500,
+      fontSize: 16,
     );
   }
 }
