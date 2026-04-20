@@ -6,6 +6,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spotify/core/configs/theme/app_theme.dart';
 import 'package:spotify/presentation/choose_mode/bloc/theme_cubit.dart';
+import 'package:spotify/presentation/home/bloc/home_auth_cubit.dart';
 import 'package:spotify/presentation/splash/pages/auth_gate.dart';
 import 'package:spotify/service/service_locator.dart';
 import 'firebase_options.dart';
@@ -29,7 +30,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => ThemeCubit())
+        BlocProvider(create: (_) => ThemeCubit()),              // Theme
+        BlocProvider(create: (_) => service<HomeAuthCubit>()),  // Authentication
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, mode) =>

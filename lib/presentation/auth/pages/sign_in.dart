@@ -10,6 +10,7 @@ import 'package:spotify/common/widgets/app_password_field.dart';
 import 'package:spotify/data/models/auth/sign_in_user_request.dart';
 import 'package:spotify/presentation/auth/bloc/sign_in_cubit.dart';
 import 'package:spotify/presentation/auth/pages/sign_up.dart';
+import 'package:spotify/presentation/home/pages/home.dart';
 import '../../../common/helpers/throttle_utils.dart';
 import '../../../common/widgets/app_button.dart';
 import '../../../common/widgets/app_loading.dart';
@@ -18,8 +19,7 @@ import '../../../common/widgets/app_top_bar.dart';
 import '../../../core/configs/asset/app_vectors.dart';
 import '../../../core/configs/theme/app_colors.dart';
 import '../../../service/service_locator.dart';
-import '../../root/bloc/root_auth_cubit.dart';
-import '../../root/pages/root.dart';
+import '../../home/bloc/home_auth_cubit.dart';
 import '../bloc/sign_in_state.dart';
 
 class SignInPage extends StatelessWidget {
@@ -47,8 +47,8 @@ class SignInPage extends StatelessWidget {
             if (state is SignInSuccess) {
               context.pushAndRemoveUntil(
                   BlocProvider(
-                      create: (context) => service<RootAuthCubit>(),
-                      child: const RootPage()
+                      create: (context) => service<HomeAuthCubit>(),
+                      child: const HomePage()
                   )
               );
             }

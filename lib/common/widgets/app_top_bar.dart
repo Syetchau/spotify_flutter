@@ -5,10 +5,14 @@ import 'package:spotify/common/helpers/theme_utils.dart';
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
 
   final Widget? title;
+  final bool isHideBackBtn;
+  final List<Widget>? actions;  // For customize trailing icons
 
   const AppTopBar({
     super.key,
-    this.title
+    this.title,
+    this.isHideBackBtn = false,
+    this.actions,
   });
 
   @override
@@ -22,7 +26,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
         elevation: 0,
         title: title ?? const Text(''),
         centerTitle: true,
-        leading: IconButton(
+        leading: isHideBackBtn ? null : IconButton(
             onPressed: () { context.back(); },
             icon: Container(
               height: 50,
@@ -38,6 +42,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             )
         ),
+        actions: actions,
       ),
     );
   }

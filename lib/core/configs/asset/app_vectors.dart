@@ -10,4 +10,5 @@ class AppVectors {
   static const String bottomPattern = '${basePath}bottom_pattern$format';
   static const String facebook = '${basePath}facebook$format';
   static const String google = '${basePath}google$format';
+  static const String homeTopCard = '${basePath}home_top_card$format';
 }

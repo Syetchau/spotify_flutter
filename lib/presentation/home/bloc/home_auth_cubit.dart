@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spotify/presentation/root/bloc/root_auth_state.dart';
+import 'package:spotify/presentation/home/bloc/home_auth_state.dart';
 import '../../../domain/usecases/auth/sign_out_use_case.dart';
 
-class RootAuthCubit extends Cubit<RootAuthState> {
+class HomeAuthCubit extends Cubit<HomeAuthState> {
   // Use dependency injection
   final SignOutUseCase _signOutUseCase;
   StreamSubscription<User?>? _authSubscription;
   bool _isTimerDone = false;
 
-  RootAuthCubit(this._signOutUseCase) : super(AuthInitial()) {
+  HomeAuthCubit(this._signOutUseCase) : super(AuthInitial()) {
     _init();
   }
 
