@@ -17,3 +17,12 @@ class Unauthenticated extends RootAuthState {
   final String errorMessage;
   Unauthenticated({required this.errorMessage});
 }
+
+// User perform sign out success
+class SignOutSuccess extends RootAuthState {}
+
+// User perform sign out error
+class SignOutError extends RootAuthState {
+  final String errorMessage;
+  SignOutError({required this.errorMessage});
+}

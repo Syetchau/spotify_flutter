@@ -5,7 +5,9 @@ import 'package:spotify/domain/repository/auth/auth_repository.dart';
 import 'package:spotify/domain/usecases/auth/sign_in_facebook_use_case.dart';
 import 'package:spotify/domain/usecases/auth/sign_in_google_use_case.dart';
 import 'package:spotify/domain/usecases/auth/sign_in_use_case.dart';
+import 'package:spotify/domain/usecases/auth/sign_out_use_case.dart';
 import 'package:spotify/domain/usecases/auth/sign_up_use_case.dart';
+import '../presentation/root/bloc/root_auth_cubit.dart';
 
 final service = GetIt.instance;
 
@@ -23,4 +25,8 @@ Future<void> initDependencies() async {
   service.registerSingleton<SignInWithGoogleUseCase>(SignInWithGoogleUseCase());
 
   service.registerSingleton<SignInWithFacebookUseCase>(SignInWithFacebookUseCase());
+
+  service.registerSingleton<SignOutUseCase>(SignOutUseCase());
+
+  service.registerFactory<RootAuthCubit>(() => RootAuthCubit(service<SignOutUseCase>()));
 }

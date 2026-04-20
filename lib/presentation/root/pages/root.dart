@@ -40,8 +40,19 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver {
       builder: (context, state) {
         return Stack(
           children: [
-            const Scaffold(
-              body: Center(child: Text("Welcome to Spotify")),
+            Scaffold(
+              body: SafeArea(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Center(child: Text("Welcome to Spotify")),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                        onTap: () { context.read<RootAuthCubit>().signOut(); },
+                        child: const Text("Sign out"))
+                  ],
+                ),
+              ),
             ),
 
             if (state is AuthLoading) const AppLoading(),

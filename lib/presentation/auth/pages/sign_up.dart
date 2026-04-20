@@ -19,6 +19,7 @@ import 'package:spotify/presentation/root/pages/root.dart';
 import '../../../common/helpers/throttle_utils.dart';
 import '../../../core/configs/asset/app_vectors.dart';
 import '../../../core/configs/theme/app_colors.dart';
+import '../../../service/service_locator.dart';
 import '../../root/bloc/root_auth_cubit.dart';
 
 class SignUpPage extends StatelessWidget {
@@ -47,7 +48,7 @@ class SignUpPage extends StatelessWidget {
             if (state is SignUpSuccess) {
               context.pushAndRemoveUntil(
                   BlocProvider(
-                      create: (context) => RootAuthCubit(),
+                      create: (context) => service<RootAuthCubit>(),
                       child: const RootPage()
                   )
               );

@@ -17,6 +17,7 @@ import '../../../common/widgets/app_text.dart';
 import '../../../common/widgets/app_top_bar.dart';
 import '../../../core/configs/asset/app_vectors.dart';
 import '../../../core/configs/theme/app_colors.dart';
+import '../../../service/service_locator.dart';
 import '../../root/bloc/root_auth_cubit.dart';
 import '../../root/pages/root.dart';
 import '../bloc/sign_in_state.dart';
@@ -46,7 +47,7 @@ class SignInPage extends StatelessWidget {
             if (state is SignInSuccess) {
               context.pushAndRemoveUntil(
                   BlocProvider(
-                      create: (context) => RootAuthCubit(),
+                      create: (context) => service<RootAuthCubit>(),
                       child: const RootPage()
                   )
               );

@@ -1,70 +1,70 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:spotify/data/models/auth/create_user_request.dart';
 import 'package:spotify/data/models/auth/sign_in_user_request.dart';
+import '../../../common/helpers/app_constants.dart';
 
 abstract class AuthFirebaseService {
-
   Future<Either> signUp(CreateUserRequest request);
-
   Future<Either> signIn(SignInUserRequest request);
-
   Future<Either> signInWithGoogle();
-
   Future<Either> signInWithFacebook();
+  Future<Either> signOut();
 }
 
 class AuthFirebaseServiceImpl extends AuthFirebaseService {
 
   @override
-  Future<Either> signIn(SignInUserRequest request) async {
+  Future<Either> signUp(CreateUserRequest request) async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      var data = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: request.email,
           password: request.password
       );
 
-      return const Right('Sign In Successful');
+      await FirebaseFirestore.instance
+          .collection(FirebaseConstants.usersCollection)
+          .doc(data.user?.uid)
+          .set({
+             FirebaseConstants.fieldName: request.username,
+             FirebaseConstants.fieldEmail: request.email,
+             FirebaseConstants.fieldCreatedAt: FieldValue.serverTimestamp(),
+             FirebaseConstants.fieldLastLogin: FieldValue.serverTimestamp()
+          });
+
+      return const Right(FirebaseConstants.signUpSuccess);
 
     } on FirebaseAuthException catch (e) {
-      String message = '';
-
-      switch (e.code) {
-        case 'invalid-email': message = 'No user found for that email.';
-        case 'invalid-credential': message = 'Wrong password provided for that user.';
-        case 'operation-not-allowed':message = 'Email/password accounts are not enabled.';
-        case 'network-request-failed': message = 'Please check your internet connection.';
-        default: message = e.message ?? 'An unknown authentication error occurred.';
-      }
-      return Left(message);
+      return Left(_handleAuthException(e));
+    } catch (e) {
+      return const Left(FirebaseConstants.errorUnexpected);
     }
   }
 
   @override
-  Future<Either> signUp(CreateUserRequest request) async {
+  Future<Either> signIn(SignInUserRequest request) async {
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: request.email,
           password: request.password
       );
 
-      return const Right('Sign Up was Successful');
+      // Update last login timestamp
+      await FirebaseFirestore.instance
+          .collection(FirebaseConstants.usersCollection)
+          .doc(userCredential.user?.uid)
+          .update({ FirebaseConstants.fieldLastLogin: FieldValue.serverTimestamp() });
+
+      return const Right(FirebaseConstants.signInSuccess);
 
     } on FirebaseAuthException catch (e) {
-      String message = '';
-
-      switch (e.code) {
-        case 'weak-password': message = 'The password provided is too weak';
-        case 'email-already-in-use': message = 'An account already exists for that email.';
-        case 'invalid-email': message = 'The email address is not valid.';
-        case 'operation-not-allowed':message = 'Email/password accounts are not enabled.';
-        case 'network-request-failed': message = 'Please check your internet connection.';
-        default: message = e.message ?? 'An unknown authentication error occurred.';
-      }
-      return Left(message);
-      }
+      return Left(_handleAuthException(e));
+    } catch (e) {
+      return const Left(FirebaseConstants.errorUnexpected);
+    }
   }
 
   @override
@@ -81,7 +81,7 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService {
        googleUser = await googleSignIn.authenticate();
      }
 
-     if (googleUser == null) return const Left('Sign in cancelled');
+     if (googleUser == null) return const Left(FirebaseConstants.googleSignInFailed);
 
      // Obtain token
      final auth = googleUser.authentication;
@@ -93,14 +93,17 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService {
      );
 
      // Sign in to Firebase
-     await FirebaseAuth.instance.signInWithCredential(credential);
+     final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
-     return const Right('Google Sign In Successful');
+     // Sync data
+     await _upsertUserData(userCredential.user);
+
+     return const Right(FirebaseConstants.googleSignInSuccess);
 
     } on FirebaseAuthException catch (e) {
-      return Left(e.message ?? 'An error occurred during Google Sign In');
+      return Left(e.message ?? FirebaseConstants.errorGoogleSignIn);
     } catch (e) {
-      return const Left('An unexpected error occurred');
+      return const Left(FirebaseConstants.errorUnexpected);
     }
   }
 
@@ -119,18 +122,83 @@ class AuthFirebaseServiceImpl extends AuthFirebaseService {
         final OAuthCredential credential = FacebookAuthProvider.credential(accessToken.tokenString);
 
         // Authenticate with Firebase
-        await FirebaseAuth.instance.signInWithCredential(credential);
+        final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
-        return const Right('Facebook Sign In Successful');
+        // Sync data
+        await _upsertUserData(userCredential.user);
+
+        return const Right(FirebaseConstants.facebookSignInSuccess);
+
       } else if (result.status == LoginStatus.cancelled) {
-        return const Left('Facebook login was cancelled by the user');
+        return const Left(FirebaseConstants.facebookSignInCancelled);
       } else {
-        return Left(result.message ?? 'Facebook login failed');
+        return Left(result.message ?? FirebaseConstants.facebookSignInFailed);
       }
     } on FirebaseAuthException catch (e) {
-      return Left(e.message ?? 'An error occurred during Facebook Sign In');
+      return Left(e.message ?? FirebaseConstants.errorFacebookSignIn);
     } catch (e) {
-      return const Left('An unexpected error occurred');
+      return const Left(FirebaseConstants.errorUnexpected);
+    }
+  }
+
+  Future<void> _upsertUserData(User? user, {String? customName}) async {
+    if (user == null) return;
+
+    final userDoc = FirebaseFirestore.instance
+        .collection(FirebaseConstants.usersCollection)
+        .doc(user.uid);
+
+    // Check if the document exists once to make a logical decision
+    final docSnapshot = await userDoc.get();
+
+    if (!docSnapshot.exists) {
+      // New User
+      await userDoc.set({
+        FirebaseConstants.fieldName: customName ?? user.displayName ?? 'New User',
+        FirebaseConstants.fieldEmail: user.email,
+        FirebaseConstants.fieldCreatedAt: FieldValue.serverTimestamp(),
+        FirebaseConstants.fieldLastLogin: FieldValue.serverTimestamp(),
+      });
+    } else {
+      // Returning User: Only update login time
+      await userDoc.update({ FirebaseConstants.fieldLastLogin: FieldValue.serverTimestamp() });
+    }
+  }
+
+  @override
+  Future<Either> signOut() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // Identify which providers are linked to this account
+        // This is like checking the 'providerData' list in Android's FirebaseUser
+        final providers = user.providerData.map((info) => info.providerId).toList();
+
+        // Conditionally sign out from specific social providers
+        if (providers.contains(FirebaseConstants.providerGoogle)) await GoogleSignIn.instance.signOut();
+        if (providers.contains(FirebaseConstants.providerFacebook)) await FacebookAuth.instance.logOut();
+      }
+
+      // Finally, sign out from the Firebase
+      await FirebaseAuth.instance.signOut();
+
+      return const Right(FirebaseConstants.signOutSuccess);
+    } catch (e) {
+      return Left('${FirebaseConstants.signOutFailed}: ${e.toString()}');
+    }
+  }
+
+  String _handleAuthException(FirebaseAuthException e) {
+    switch (e.code) {
+      case ExceptionConstants.weakPassword: return ExceptionConstants.weakPasswordDesc;
+      case ExceptionConstants.emailAlreadyInUse: return ExceptionConstants.emailAlreadyInUseDesc;
+      case ExceptionConstants.invalidEmail: return ExceptionConstants.invalidEmailDesc;
+      case ExceptionConstants.invalidCredential: return ExceptionConstants.invalidCredentialDesc;
+      case ExceptionConstants.userNotFound: return ExceptionConstants.userNotFoundDesc;
+      case ExceptionConstants.wrongPassword: return ExceptionConstants.wrongPasswordDesc;
+      case ExceptionConstants.networkRequestFailed: return ExceptionConstants.networkRequestFailedDesc;
+      default: return e.message ?? ExceptionConstants.unknownErrorOccur;
     }
   }
 }
